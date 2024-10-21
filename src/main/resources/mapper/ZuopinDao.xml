@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ZuopinDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.zuojia_id as zuojiaId
+        ,a.zuopin_name as zuopinName
+        ,a.zuopin_uuid_number as zuopinUuidNumber
+        ,a.zuopin_photo as zuopinPhoto
+        ,a.zuopin_types as zuopinTypes
+        ,a.fabu_time as fabuTime
+        ,a.zuopin_content as zuopinContent
+        ,a.zuopin_delete as zuopinDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ZuopinView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,zuojia.zuojia_name as zuojiaName
+        ,zuojia.zuojia_uuid_number as zuojiaUuidNumber
+        ,zuojia.zuojia_photo as zuojiaPhoto
+        ,zuojia.zuojia_types as zuojiaTypes
+        ,zuojia.zuojia_minzu as zuojiaMinzu
+        ,zuojia.zuojia_jiguan as zuojiaJiguan
+        ,zuojia.chusheng_time as chushengTime
+        ,zuojia.huojiang_time as huojiangTime
+        ,zuojia.zuojia_daibia as zuojiaDaibia
+        ,zuojia.zuojia_content as zuojiaContent
+        ,zuojia.zuojia_delete as zuojiaDelete
+
+        FROM zuopin  a
+        left JOIN zuojia zuojia ON a.zuojia_id = zuojia.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.zuojiaId != null and params.zuojiaId != ''">
+                and (
+                    a.zuojia_id = #{params.zuojiaId}
+                )
+            </if>
+            <if test=" params.zuopinName != '' and params.zuopinName != null and params.zuopinName != 'null' ">
+                and a.zuopin_name like CONCAT('%',#{params.zuopinName},'%')
+            </if>
+            <if test=" params.zuopinUuidNumber != '' and params.zuopinUuidNumber != null and params.zuopinUuidNumber != 'null' ">
+                and a.zuopin_uuid_number like CONCAT('%',#{params.zuopinUuidNumber},'%')
+            </if>
+            <if test="params.zuopinTypes != null and params.zuopinTypes != ''">
+                and a.zuopin_types = #{params.zuopinTypes}
+            </if>
+            <if test=" params.fabuTimeStart != '' and params.fabuTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.fabu_time) >= UNIX_TIMESTAMP(#{params.fabuTimeStart}) ]]>
+            </if>
+            <if test=" params.fabuTimeEnd != '' and params.fabuTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.fabu_time) <= UNIX_TIMESTAMP(#{params.fabuTimeEnd}) ]]>
+            </if>
+            <if test=" params.zuopinContent != '' and params.zuopinContent != null and params.zuopinContent != 'null' ">
+                and a.zuopin_content like CONCAT('%',#{params.zuopinContent},'%')
+            </if>
+            <if test="params.zuopinDeleteStart != null and params.zuopinDeleteStart != ''">
+                <![CDATA[  and a.zuopin_delete >= #{params.zuopinDeleteStart}   ]]>
+            </if>
+            <if test="params.zuopinDeleteEnd != null and params.zuopinDeleteEnd != ''">
+                <![CDATA[  and a.zuopin_delete <= #{params.zuopinDeleteEnd}   ]]>
+            </if>
+             <if test="params.zuopinDelete != null and params.zuopinDelete != ''">
+                and a.zuopin_delete = #{params.zuopinDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断作家的id不为空 -->
+            <if test=" params.zuojiaIdNotNull != '' and params.zuojiaIdNotNull != null and params.zuojiaIdNotNull != 'null' ">
+                and a.zuojia_id IS NOT NULL
+            </if>
+            <if test=" params.zuojiaName != '' and params.zuojiaName != null and params.zuojiaName != 'null' ">
+                and zuojia.zuojia_name like CONCAT('%',#{params.zuojiaName},'%')
+            </if>
+            <if test=" params.zuojiaUuidNumber != '' and params.zuojiaUuidNumber != null and params.zuojiaUuidNumber != 'null' ">
+                and zuojia.zuojia_uuid_number like CONCAT('%',#{params.zuojiaUuidNumber},'%')
+            </if>
+            <if test="params.zuojiaTypes != null  and params.zuojiaTypes != ''">
+                and zuojia.zuojia_types = #{params.zuojiaTypes}
+            </if>
+
+            <if test=" params.zuojiaMinzu != '' and params.zuojiaMinzu != null and params.zuojiaMinzu != 'null' ">
+                and zuojia.zuojia_minzu like CONCAT('%',#{params.zuojiaMinzu},'%')
+            </if>
+            <if test=" params.zuojiaJiguan != '' and params.zuojiaJiguan != null and params.zuojiaJiguan != 'null' ">
+                and zuojia.zuojia_jiguan like CONCAT('%',#{params.zuojiaJiguan},'%')
+            </if>
+            <if test=" params.chushengTimeStart != '' and params.chushengTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(zuojia.chusheng_time) >= UNIX_TIMESTAMP(#{params.chushengTimeStart}) ]]>
+            </if>
+            <if test=" params.chushengTimeEnd != '' and params.chushengTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(zuojia.chusheng_time) <= UNIX_TIMESTAMP(#{params.chushengTimeEnd}) ]]>
+            </if>
+            <if test=" params.huojiangTimeStart != '' and params.huojiangTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(zuojia.huojiang_time) >= UNIX_TIMESTAMP(#{params.huojiangTimeStart}) ]]>
+            </if>
+            <if test=" params.huojiangTimeEnd != '' and params.huojiangTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(zuojia.huojiang_time) <= UNIX_TIMESTAMP(#{params.huojiangTimeEnd}) ]]>
+            </if>
+            <if test=" params.zuojiaDaibia != '' and params.zuojiaDaibia != null and params.zuojiaDaibia != 'null' ">
+                and zuojia.zuojia_daibia like CONCAT('%',#{params.zuojiaDaibia},'%')
+            </if>
+            <if test=" params.zuojiaContent != '' and params.zuojiaContent != null and params.zuojiaContent != 'null' ">
+                and zuojia.zuojia_content like CONCAT('%',#{params.zuojiaContent},'%')
+            </if>
+            <if test="params.zuojiaDeleteStart != null  and params.zuojiaDeleteStart != '' ">
+                <![CDATA[  and zuojia.zuojia_delete >= #{params.zuojiaDeleteStart}   ]]>
+            </if>
+            <if test="params.zuojiaDeleteEnd != null  and params.zuojiaDeleteEnd != '' ">
+                <![CDATA[  and zuojia.zuojia_delete <= #{params.zuojiaDeleteEnd}   ]]>
+            </if>
+            <if test="params.zuojiaDelete != null  and params.zuojiaDelete != '' ">
+                and zuojia.zuojia_delete = #{params.zuojiaDelete}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(zuojia.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(zuojia.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
